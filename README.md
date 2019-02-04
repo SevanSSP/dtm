@@ -34,7 +34,7 @@ work directory tree and fetch the path to all the work directories to a file *pa
 directory matches the pattern `hs*_tp*`.
 
 ```bash
-dir /s /b `hs*_tp*` > paths.txt
+dir /s /b hs*_tp* > paths.txt
 ```
 
 *paths.txt* would now look something like

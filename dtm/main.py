@@ -79,13 +79,13 @@ def execute_task(command, path, shell=False, env=None, pipe=False, timeout=None)
 
     except subprocess.TimeoutExpired as e:
         response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
-                        returncode=1, status='timeout', output=e.stdout,
+                        returncode=1, status='timeout', output=e.stdout.decode(),
                         msg=f'Command "{e.cmd}" timed out after {e.timeout} seconds.')
         logger.debug("\t" + response.get('msg'))
 
     except subprocess.CalledProcessError as e:
         response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
-                        returncode=e.returncode, status='error', output=e.stdout,
+                        returncode=e.returncode, status='error', output=e.stdout.decode(),
                         msg=f'Command "{e.cmd}" returned non-zero exit status {e.returncode}.')
         logger.debug("\t" + response.get('msg'))
 
@@ -105,12 +105,12 @@ def execute_task(command, path, shell=False, env=None, pipe=False, timeout=None)
         if p.returncode == 0:
             # response CompletedProcess with returncode 0
             response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
-                            returncode=p.returncode, status='completed', output=p.stdout,
+                            returncode=p.returncode, status='completed', output=p.stdout.decode(),
                             msg=f'Command "{command}" returned exit status 0. Congratulations!.')
         else:
             # response CompletedProcess with returncode != 0 but no exception raised
             response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
-                            returncode=p.returncode, status='error', output=p.stdout,
+                            returncode=p.returncode, status='error', output=p.stdout.decode(),
                             msg=f'Command "{command}" returned exit status {p.returncode}. See details in task log.')
 
         logger.debug("\t" + response.get('msg'))
