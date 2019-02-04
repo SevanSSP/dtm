@@ -1,4 +1,4 @@
-# AVM
+# DTM
 [![Build Status](https://travis-ci.com/SevanSSP/dtm.svg?token=3uQ4z5yHC2AVPsxguFuR&branch=master)](https://travis-ci.com/SevanSSP/dtm)
 ## Description
 Python package for managing tasks executed in parallel processes.
