@@ -256,11 +256,13 @@ def cli():
     # write status listing 'status.txt'(only primary info)
     all_tasks = list()
     failed_tasks = list()
-    all_tasks.append(f"{'Path':<70}{'PID':>10}{'PPID':>10}{'Status':>10}" + "\n")
-    all_tasks.append(100 * "-" + "\n")
+    path_length = 5 + max(len(p) for p in paths)  # longest path (for output formatting)
+    all_tasks.append(f"{'Path':<{path_length}}{'PID':>10}{'PPID':>10}{'Status':>10}" + "\n")
+    all_tasks.append((path_length + 30) * "-" + "\n")
     for r in response:
         # for the overall status
-        all_tasks.append(f"{r.get('path'):<70}{r.get('pid'):>10}{r.get('ppid'):>10}{r.get('status'):>10}" + "\n")
+        all_tasks.append(f"{r.get('path'):<{path_length}}{r.get('pid'):>10}{r.get('ppid'):>10}{r.get('status'):>10}" +
+                         "\n")
 
         if r.get('returncode') != 0:
             # only the failed cases
