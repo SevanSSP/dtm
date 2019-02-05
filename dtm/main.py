@@ -23,7 +23,7 @@ LOGGING_LEVELS = dict(
 )
 
 
-def execute_task(command, path, shell=False, env=None, pipe=False, timeout=None):
+def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=None):
     """
     Execute task in subprocess
 
@@ -31,8 +31,8 @@ def execute_task(command, path, shell=False, env=None, pipe=False, timeout=None)
     ----------
     command: tuple
         Sequence where the program to execute is the first item and the following items are arguments to the program.
-    path : str
-        Directory in which to execute program
+    path : str, optional
+        Directory in which to execute program, current work directory by default
     shell : bool, optional
         Spin up a system dependent shell process (commonly \bin\sh on Linux or cmd.exe on Windows) and run the command
         within it. Not needed if calling an executable file.
@@ -56,6 +56,10 @@ def execute_task(command, path, shell=False, env=None, pipe=False, timeout=None)
             msg - Description
 
     """
+    # use current work directory if none is specified
+    if path is None:
+        path = os.getcwd()
+
     # concatenate env variables to pass
     if env is not None:
         env = dict(**os.environ, **env)
@@ -156,7 +160,8 @@ def execute_tasks(command, paths, processes=None, shell=False, env=None, pipe=Fa
 
     # dispatch processes
     logger.debug(f"Dispatching {len(paths)} tasks to worker pool...")
-    processes = [pool.apply_async(execute_task, args=(command, p), kwds=dict(shell=shell, env=env, pipe=pipe, timeout=timeout))
+    processes = [pool.apply_async(execute_task, args=(command, ), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
+                                                                            timeout=timeout))
                  for p in paths]
 
     # report pending tasks
@@ -241,7 +246,7 @@ def cli():
     logger.addHandler(ch)
 
     # configure filehandler with lowest log level
-    fh = logging.FileHandler("log.txt", mode="w")
+    fh = logging.FileHandler("dtm_log.txt", mode="w")
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(pathname)s - %(lineno)s: %(message)s")
     fh.setFormatter(formatter)
     fh.setLevel(logging.DEBUG)
