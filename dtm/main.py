@@ -221,7 +221,7 @@ def cli():
                         help="Command to be executed in each work directory. Can be a shell command like 'dir' or path "
                              "to an executable '/home/bin/run_something.cmd'.")
     parser.add_argument("path_file", type=str, help="Textfile with work directory paths, only one per line.")
-    parser.add_argument("-p", "--processes", type=int, nargs=1,
+    parser.add_argument("-p", "--processes", type=int,
                         help="The number of worker processes to use. By default the OS CPU count is used.")
     parser.add_argument("-s", "--shell", action="store_true",
                         help="Spin up a system dependent shell process (commonly bash on Linux or cmd on Windows) and "
