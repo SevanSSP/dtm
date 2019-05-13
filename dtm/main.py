@@ -260,18 +260,8 @@ def cli():
     command = tuple(args.command.split())
 
     # distribute tasks and collect response
-    response = execute_tasks(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout)
-
-    # write status listing 'status.txt'(only primary info)
-    all_tasks = list()
-    failed_tasks = list()
-    path_length = 5 + max(len(p) for p in paths)  # longest path (for output formatting)
-    all_tasks.append(f"{'Path':<{path_length}}{'PID':>10}{'PPID':>10}{'Status':>10}" + "\n")
-    all_tasks.append((path_length + 30) * "-" + "\n")
-    for r in response:
-        # for the overall status
-        all_tasks.append(f"{r.get('path'):<{path_length}}{r.get('pid'):>10}{r.get('ppid'):>10}{r.get('status'):>10}" +
-                         "\n")
+    response = execute_tasks(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
+                             timeout=args.timeout)
 
         if r.get('returncode') != 0:
             # only the failed cases
