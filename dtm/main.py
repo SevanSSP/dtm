@@ -51,6 +51,7 @@ def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=
             returncode - 0 means success, non-zero code means failure
             ppid - parent process id
             pid - process id
+            path - work directory
             output - dump from standard out (empty if dumped to file)
             status - 'completed', 'failed' or 'timed out'
             msg - Description
