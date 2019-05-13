@@ -19,7 +19,7 @@ setup(
     long_description=read('README.md'),
     entry_points={
         'console_scripts': [
-            'dtm-run=dtm.main:cli',
+            'dtm=dtm.main:cli',
         ],
     }
 )
