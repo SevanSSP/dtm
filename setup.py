@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name='dtm',
-    version='0.1.3',
+    version='0.1.4',
     packages=find_packages(exclude='tests'),
     url='https://github.com/SevanSSP/dtm',
     license='MIT',
@@ -19,7 +19,7 @@ setup(
     long_description=read('README.md'),
     entry_points={
         'console_scripts': [
-            'dtm-run=dtm.main:cli',
+            'dtm=dtm.main:cli',
         ],
     }
 )

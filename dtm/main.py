@@ -51,6 +51,7 @@ def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=
             returncode - 0 means success, non-zero code means failure
             ppid - parent process id
             pid - process id
+            path - work directory
             output - dump from standard out (empty if dumped to file)
             status - 'completed', 'failed' or 'timed out'
             msg - Description
@@ -210,6 +211,45 @@ def parse_path_file(filename):
         return paths
 
 
+def log_response(response):
+    """
+
+    Parameters
+    ----------
+    response : list
+        Dictionaries of process response
+
+    Notes
+    -----
+    Writes
+    """
+    # write status listing 'status.txt'(only primary info)
+    all_tasks = list()
+    failed_tasks = list()
+    path_length = 5 + max(len(_.get('path')) for _ in response)  # longest path (for output formatting)
+    all_tasks.append(f"{'Path':<{path_length}}{'PID':>10}{'PPID':>10}{'Status':>10}" + "\n")
+    all_tasks.append((path_length + 30) * "-" + "\n")
+    for r in response:
+        # for the overall status
+        all_tasks.append(f"{r.get('path'):<{path_length}}{r.get('pid'):>10}{r.get('ppid'):>10}{r.get('status'):>10}" +
+                         "\n")
+
+        if r.get('returncode') != 0:
+            # only the failed cases
+            failed_tasks.append(r.get('path') + "\n")
+
+    # write status summary
+    with open('status.txt', 'w') as f:
+        f.writelines(all_tasks)
+    logger.info("Task status written to 'status.txt.")
+
+    # list paths to failed runs
+    if len(failed_tasks) > 0:
+        with open('failed_paths.txt', 'w') as f:
+            f.writelines(failed_tasks)
+        logger.info("Paths to failed tasks written to 'failed_paths.txt.")
+
+
 def cli():
     """
     Command line interface for executing tasks
@@ -259,30 +299,8 @@ def cli():
     command = tuple(args.command.split())
 
     # distribute tasks and collect response
-    response = execute_tasks(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout)
+    response = execute_tasks(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
+                             timeout=args.timeout)
 
-    # write status listing 'status.txt'(only primary info)
-    all_tasks = list()
-    failed_tasks = list()
-    path_length = 5 + max(len(p) for p in paths)  # longest path (for output formatting)
-    all_tasks.append(f"{'Path':<{path_length}}{'PID':>10}{'PPID':>10}{'Status':>10}" + "\n")
-    all_tasks.append((path_length + 30) * "-" + "\n")
-    for r in response:
-        # for the overall status
-        all_tasks.append(f"{r.get('path'):<{path_length}}{r.get('pid'):>10}{r.get('ppid'):>10}{r.get('status'):>10}" +
-                         "\n")
-
-        if r.get('returncode') != 0:
-            # only the failed cases
-            failed_tasks.append(r.get('path') + "\n")
-
-    # write status summary
-    with open('status.txt', 'w') as f:
-        f.writelines(all_tasks)
-    logger.info("Task status written to 'status.txt.")
-
-    # list paths to failed runs
-    if len(failed_tasks) > 0:
-        with open('failed_paths.txt', 'w') as f:
-            f.writelines(failed_tasks)
-        logger.info("Paths to failed tasks written to 'failed_paths.txt.")
+    # log the process response
+    log_response(response)
