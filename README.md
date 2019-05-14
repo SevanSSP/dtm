@@ -51,19 +51,19 @@ dir /s /b hs*_tp* > paths.txt
 Then execute `run.cmd` in all work directories utilizing all available CPUs
 
 ```bash
-dtm-run run.cmd paths.txt
+dtm run.cmd paths.txt
 ```
 
 Use only 4 CPUs 
 
 ```bash
-dtm-run run.cmd paths.txt --processes 4
+dtm run.cmd paths.txt --processes 4
 ```
 
 Stop processes that run more than 60 seconds.
 
 ```bash
-dtm-run run.cmd paths.txt --processes 4 --timeout 60
+dtm run.cmd paths.txt --processes 4 --timeout 60
 ```
 
 The status of all processes is written to *status.txt*. Paths to work directories of failed processes is written to 
