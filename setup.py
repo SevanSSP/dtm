@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name='dtm',
-    version='0.1.4',
+    version='0.1.5',
     packages=find_packages(exclude='tests'),
     url='https://github.com/SevanSSP/dtm',
     license='MIT',
