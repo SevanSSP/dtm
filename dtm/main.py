@@ -44,6 +44,10 @@ def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=
     timeout : int, optional
         Number of seconds before terminating the process
 
+    Notes
+    -----
+    The command parameters are concatenated as string if `shell` is True.
+
     Returns
     -------
     dict
@@ -66,6 +70,10 @@ def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=
         env = dict(**os.environ, **env)
     else:
         env = os.environ
+
+    # concatenate command parameters to string if shell
+    if shell:
+        command = ' '.join(command)
 
     # choose handling of standard out/err
     if pipe:
