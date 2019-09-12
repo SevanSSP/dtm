@@ -8,7 +8,7 @@ import json
 import time
 import logging
 import argparse
-
+import datetime
 
 # grab logger from multiprocessing package
 logger = mp.get_logger()
@@ -174,9 +174,12 @@ def subprocess_command_mp(command, paths, processes=None, shell=False, env=None,
                  for p in paths]
 
     # report pending tasks
+    t0 = datetime.datetime.now()
     while pool._cache:
-        logger.info(f"Number of tasks pending: {len(pool._cache)}")
-        time.sleep(10)
+        t1 = datetime.datetime.now()
+        if (t1 - t0).total_seconds() >= 15:
+            logger.info(f"Number of tasks pending: {len(pool._cache)}")
+            t0 = datetime.datetime.now()
 
     # prevent any more tasks from being submitted to the pool
     pool.close()
