@@ -7,11 +7,11 @@ from platform import system
 
 class TestCase(unittest.TestCase):
     def test_python(self):
-        r = subprocess_command(('python --version',), pipe=True)
-        self.assertNotEqual(r.get('returncode'), 0)
-        self.assertEqual(r.get('status'), 'error')
+        r = subprocess_command('python --version', pipe=True)
+        self.assertEqual(r.get('returncode'), 0)
+        self.assertEqual(r.get('status'), 'completed')
 
-        r = subprocess_command(('python --version',), pipe=True, shell=True)
+        r = subprocess_command('python --version', pipe=True, shell=True)
         self.assertEqual(r.get('returncode'), 0)
         self.assertEqual(r.get('status'), 'completed')
 
@@ -19,11 +19,11 @@ class TestCase(unittest.TestCase):
         if not system == 'Linux':
             pass
         else:
-            r = subprocess_command(('ls', '-a'), pipe=True)
+            r = subprocess_command('ls -a', pipe=True)
             self.assertNotEqual(r.get('returncode'), 0)
             self.assertEqual(r.get('status'), 'error')
 
-            r = subprocess_command(('ls', '-a'), pipe=True, shell=True)
+            r = subprocess_command('ls -a', pipe=True, shell=True)
             self.assertEqual(r.get('returncode'), 0)
             self.assertEqual(r.get('status'), 'completed')
 
@@ -31,11 +31,11 @@ class TestCase(unittest.TestCase):
         if not system == 'Windows':
             pass
         else:
-            r = subprocess_command(('dir', '/s', '/b'), pipe=True)
+            r = subprocess_command('dir /s /b', pipe=True)
             self.assertNotEqual(r.get('returncode'), 0)
             self.assertEqual(r.get('status'), 'error')
 
-            r = subprocess_command(('dir', '/s', '/b'), pipe=True, shell=True)
+            r = subprocess_command('dir /s /b', pipe=True, shell=True)
             self.assertEqual(r.get('returncode'), 0)
             self.assertEqual(r.get('status'), 'completed')
 

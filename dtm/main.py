@@ -5,7 +5,6 @@ import multiprocessing as mp
 import subprocess
 import os
 import json
-import time
 import logging
 import argparse
 import datetime
@@ -61,6 +60,11 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
             msg - Description
 
     """
+    # ensure correct type
+    if not isinstance(command, str):
+        logger.error(f"The command must be a string not a {type(command)}.")
+        raise TypeError(f"The command must be a string not a {type(command)}.")
+
     # use current work directory if none is specified
     if path is None:
         path = os.getcwd()
@@ -134,7 +138,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
     return response
 
 
-def subprocess_commands(commands, paths, processes=None, shell=False, env=None, pipe=False, timeout=None):
+def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None, pipe=False, timeout=None):
     """
     Execute commands over many work directories in several parallel subprocess.
 
@@ -145,7 +149,7 @@ def subprocess_commands(commands, paths, processes=None, shell=False, env=None, 
         command will be executed in each of the work directories.
     paths : tuple
         Directories in which to execute program
-    processes: int, optional
+    nprocesses: int, optional
         Choose the number of concurrent processes. Default the number of CPUs, see ´os.cpu_count()´
     shell : bool, optional
         Spin up a system dependent shell process (commonly \bin\sh on Linux or cmd.exe on Windows) and run the command
@@ -174,14 +178,14 @@ def subprocess_commands(commands, paths, processes=None, shell=False, env=None, 
         logger.error(f"The `commands` parameter must be a string or a list, not {type(commands)}.")
 
     # initiate worker pool
-    pool = mp.Pool(processes=processes)
-    logger.debug(f"Initiated pool of {processes} workers.")
+    pool = mp.Pool(processes=nprocesses)
+    logger.debug(f"Initiated pool of {nprocesses} workers.")
 
     # dispatch processes
     logger.debug(f"Dispatching {len(paths)} tasks to worker pool...")
-    processes = [pool.apply_async(subprocess_command, args=(c,), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
-                                                                           timeout=timeout))
-                 for c, p in zip(commands, paths)]
+    subprocesses = [pool.apply_async(subprocess_command, args=(c,), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
+                                                                              timeout=timeout))
+                    for c, p in zip(commands, paths)]
 
     # report pending tasks
     t0 = datetime.datetime.now()
@@ -197,6 +201,75 @@ def subprocess_commands(commands, paths, processes=None, shell=False, env=None, 
 
     # provides a synchronization point that can report some exceptions occurring in worker processes
     pool.join()
+    logger.debug("Join worker processes.")
+
+    # retrieve response from processes
+    response = [p.get() for p in subprocesses]
+    logger.debug("Retrieved response from the processes:")
+    logger.debug(json.dumps(response, indent=2))
+
+    return response
+
+
+def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None):
+    """
+    Multiprocess functions.
+
+    Parameters
+    ----------
+    functions: list
+        Functions to execute.
+    args : list[list], optional
+        Function positional arguments.
+    kwargs : list[dict], optional
+        Function keyword arguments.
+    nprocesses: int, optional
+        Choose the number of concurrent processes. Default the number of CPUs, see ´os.cpu_count()´
+
+    Returns
+    -------
+    list
+        Collection of function responses.
+
+    Notes
+    -----
+    The order of the returned response equals the order of the input functions and its arguments.
+
+    """
+    if args is not None and len(functions) != len(args):
+        logger.error(f"The number of functions must equal the number of argument sets. You specified {len(functions)} "
+                     f"functions and {len(args)} argument sets.")
+    elif args is None:
+        args = [list() for _ in functions]
+
+    if kwargs is not None and len(functions) != len(kwargs):
+        logger.error(f"The number of functions must equal the number of keyword argument sets. You specified "
+                     f"{len(functions)} functions and {len(kwargs)} argument sets.")
+    elif kwargs is None:
+        kwargs = [dict() for _ in functions]
+
+    # initiate worker pool
+    pool = mp.Pool(processes=nprocesses)
+    logger.debug(f"Initiated pool of {nprocesses} workers.")
+
+    # dispatch processes
+    logger.debug(f"Dispatching {len(functions)} tasks to worker pool...")
+    processes = [pool.apply_async(f, args=a, kwds=k) for f, a, k in zip(functions, args, kwargs)]
+
+    # report pending tasks
+    t0 = datetime.datetime.now()
+    while pool._cache:
+        t1 = datetime.datetime.now()
+        if (t1 - t0).total_seconds() >= 15:
+            logger.debug(f"Number of tasks pending: {len(pool._cache)}")
+            t0 = datetime.datetime.now()
+
+    # prevent any more tasks from being submitted to the pool
+    #pool.close()
+    logger.debug("Closed worker pool to prevent more tasks from being submitted.")
+
+    # provides a synchronization point that can report some exceptions occurring in worker processes
+    #pool.join()
     logger.debug("Join worker processes.")
 
     # retrieve response from processes
@@ -320,7 +393,7 @@ def cli():
     command = tuple(args.command.split())
 
     # distribute tasks and collect response
-    response = subprocess_commands(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
+    response = subprocess_commands(command, paths, nprocesses=args.processes, shell=args.shell, pipe=args.pipe_stdout,
                                    timeout=args.timeout)
 
     # log the process response
