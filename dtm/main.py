@@ -134,7 +134,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
     return response
 
 
-def subprocess_command_mp(command, paths, processes=None, shell=False, env=None, pipe=False, timeout=None):
+def subprocess_commands(commands, paths, processes=None, shell=False, env=None, pipe=False, timeout=None):
     """
     Execute command over many work directories in several parallel subprocess.
 
