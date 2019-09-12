@@ -23,9 +23,9 @@ LOGGING_LEVELS = dict(
 )
 
 
-def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=None):
+def subprocess_command(command, path=None, shell=False, env=None, pipe=False, timeout=None):
     """
-    Execute task in subprocess
+    Execute command in subprocess.
 
     Parameters
     ----------
@@ -134,9 +134,9 @@ def execute_task(command, path=None, shell=False, env=None, pipe=False, timeout=
     return response
 
 
-def execute_tasks(command, paths, processes=None, shell=False, env=None, pipe=False, timeout=None):
+def subprocess_command_mp(command, paths, processes=None, shell=False, env=None, pipe=False, timeout=None):
     """
-    Parallel execution of tasks
+    Execute command over many work directories in several parallel subprocess.
 
     Parameters
     ----------
@@ -169,8 +169,8 @@ def execute_tasks(command, paths, processes=None, shell=False, env=None, pipe=Fa
 
     # dispatch processes
     logger.debug(f"Dispatching {len(paths)} tasks to worker pool...")
-    processes = [pool.apply_async(execute_task, args=(command, ), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
-                                                                            timeout=timeout))
+    processes = [pool.apply_async(subprocess_command, args=(command,), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
+                                                                                 timeout=timeout))
                  for p in paths]
 
     # report pending tasks
@@ -307,8 +307,8 @@ def cli():
     command = tuple(args.command.split())
 
     # distribute tasks and collect response
-    response = execute_tasks(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
-                             timeout=args.timeout)
+    response = subprocess_command_mp(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
+                                     timeout=args.timeout)
 
     # log the process response
     log_response(response)
