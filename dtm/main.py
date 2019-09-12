@@ -29,8 +29,8 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
 
     Parameters
     ----------
-    command: tuple
-        Sequence where the program to execute is the first item and the following items are arguments to the program.
+    command: str
+        Command str (the program to execute is the first item and the following items are arguments to the program).
     path : str, optional
         Directory in which to execute program, current work directory by default
     shell : bool, optional
@@ -46,7 +46,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
 
     Notes
     -----
-    The command parameters are concatenated as string if `shell` is True.
+    The command parameters are split as list if `shell` is False.
 
     Returns
     -------
@@ -72,8 +72,8 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
         env = os.environ
 
     # concatenate command parameters to string if shell
-    if shell:
-        command = ' '.join(command)
+    if not shell:
+        command = command.split()
 
     # choose handling of standard out/err
     if pipe:
@@ -136,12 +136,13 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
 
 def subprocess_commands(commands, paths, processes=None, shell=False, env=None, pipe=False, timeout=None):
     """
-    Execute command over many work directories in several parallel subprocess.
+    Execute commands over many work directories in several parallel subprocess.
 
     Parameters
     ----------
-    command: tuple
-        Sequence where the program to execute is the first item and the following items are arguments to the program.
+    commands: list or str
+        Commands to execute in each of the work directories/paths specified. If `commands` is a single string, that
+        command will be executed in each of the work directories.
     paths : tuple
         Directories in which to execute program
     processes: int, optional
@@ -163,22 +164,31 @@ def subprocess_commands(commands, paths, processes=None, shell=False, env=None, 
         Collection of subprocess response
 
     """
+    if isinstance(commands, (list, tuple)):
+        if len(commands) != len(paths):
+            logger.error(f"The number of commands must equal the number of work directories. You specified "
+                         f"{len(commands)} commands and {len(paths)} work directories.")
+    elif isinstance(commands, str):
+        commands = [commands for _ in paths]    # duplicate command for all work directories
+    else:
+        logger.error(f"The `commands` parameter must be a string or a list, not {type(commands)}.")
+
     # initiate worker pool
     pool = mp.Pool(processes=processes)
     logger.debug(f"Initiated pool of {processes} workers.")
 
     # dispatch processes
     logger.debug(f"Dispatching {len(paths)} tasks to worker pool...")
-    processes = [pool.apply_async(subprocess_command, args=(command,), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
-                                                                                 timeout=timeout))
-                 for p in paths]
+    processes = [pool.apply_async(subprocess_command, args=(c,), kwds=dict(path=p, shell=shell, env=env, pipe=pipe,
+                                                                           timeout=timeout))
+                 for c, p in zip(commands, paths)]
 
     # report pending tasks
     t0 = datetime.datetime.now()
     while pool._cache:
         t1 = datetime.datetime.now()
         if (t1 - t0).total_seconds() >= 15:
-            logger.info(f"Number of tasks pending: {len(pool._cache)}")
+            logger.debug(f"Number of tasks pending: {len(pool._cache)}")
             t0 = datetime.datetime.now()
 
     # prevent any more tasks from being submitted to the pool
@@ -310,8 +320,8 @@ def cli():
     command = tuple(args.command.split())
 
     # distribute tasks and collect response
-    response = subprocess_command_mp(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
-                                     timeout=args.timeout)
+    response = subprocess_commands(command, paths, processes=args.processes, shell=args.shell, pipe=args.pipe_stdout,
+                                   timeout=args.timeout)
 
     # log the process response
     log_response(response)
