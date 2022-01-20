@@ -10,7 +10,7 @@ def lint(session):
     session.install("flake8")
     session.run(
         "flake8",
-        "modeltestSDK/",
+        "dtm/",
         "--count",
         "--select=E9,F63,F7,F82",
         "--show-source",
@@ -18,7 +18,7 @@ def lint(session):
     )
     session.run(
         "flake8",
-        "modeltestSDK/",
+        "dtm/",
         "--count",
         "--exit-zero",
         "--max-complexity=10",
@@ -55,6 +55,6 @@ def cover(session):
 def blacken(session):
     """Run black code formatter."""
     session.install("black", "isort")
-    files = ["modeltestSDK", "tests", "noxfile.py"]
+    files = ["dtm", "tests", "noxfile.py"]
     session.run("black", *files, "--diff", "--color")
     session.run("isort", *files, "--diff")

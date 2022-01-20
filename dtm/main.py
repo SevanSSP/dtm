@@ -33,7 +33,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
     path : str, optional
         Directory in which to execute program, current work directory by default
     shell : bool, optional
-        Spin up a system dependent shell process (commonly \bin\sh on Linux or cmd.exe on Windows) and run the command
+        Spin up a system dependent shell process (commonly /bin/sh on Linux or cmd.exe on Windows) and run the command
         within it. Not needed if calling an executable file.
     env : dict, optional
         Environmental variables passed to program
@@ -112,12 +112,14 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
                         returncode=1, status='error', output='',
                         msg=f'Command "{command[0]}" could not be found.')
         logger.debug("\t" + response.get('msg'))
+        logger.debug("\t" + e)
 
     except NotADirectoryError as e:
         response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
                         returncode=1, status='error', output='',
                         msg=f'The path "{path}" is invalid. The directory does not exist.')
         logger.debug("\t" + response.get('msg'))
+        logger.debug("\t" + e)
 
     else:
         if p.returncode == 0:
@@ -139,7 +141,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
 
 
 def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None, pipe=False, timeout=None):
-    """
+    r"""
     Execute commands over many work directories in several parallel subprocess.
 
     Parameters
@@ -152,7 +154,7 @@ def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None,
     nprocesses: int, optional
         Choose the number of concurrent processes. Default the number of CPUs, see ´os.cpu_count()´
     shell : bool, optional
-        Spin up a system dependent shell process (commonly \bin\sh on Linux or cmd.exe on Windows) and run the command
+        Spin up a system dependent shell process (commonly /bin/sh on Linux or cmd.exe on Windows) and run the command
         within it. Not needed if calling an executable file.
     env : dict, optional
         Environmental variables passed to program
@@ -265,11 +267,11 @@ def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None):
             t0 = datetime.datetime.now()
 
     # prevent any more tasks from being submitted to the pool
-    #pool.close()
+    # pool.close()
     logger.debug("Closed worker pool to prevent more tasks from being submitted.")
 
     # provides a synchronization point that can report some exceptions occurring in worker processes
-    #pool.join()
+    # pool.join()
     logger.debug("Join worker processes.")
 
     # retrieve response from processes
