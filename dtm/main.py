@@ -33,7 +33,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
     path : str, optional
         Directory in which to execute program, current work directory by default
     shell : bool, optional
-        Spin up a system dependent shell process (commonly \bin\sh on Linux or cmd.exe on Windows) and run the command
+        Spin up a system dependent shell process (commonly /bin/sh on Linux or cmd.exe on Windows) and run the command
         within it. Not needed if calling an executable file.
     env : dict, optional
         Environmental variables passed to program
@@ -112,12 +112,14 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
                         returncode=1, status='error', output='',
                         msg=f'Command "{command[0]}" could not be found.')
         logger.debug("\t" + response.get('msg'))
+        logger.debug("\t" + e)
 
     except NotADirectoryError as e:
         response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
                         returncode=1, status='error', output='',
                         msg=f'The path "{path}" is invalid. The directory does not exist.')
         logger.debug("\t" + response.get('msg'))
+        logger.debug("\t" + e)
 
     else:
         if p.returncode == 0:
@@ -139,20 +141,20 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
 
 
 def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None, pipe=False, timeout=None):
-    """
+    r"""
     Execute commands over many work directories in several parallel subprocess.
 
     Parameters
     ----------
-    commands: list or str
-        Commands to execute in each of the work directories/paths specified. If `commands` is a single string, that
+    commands: list
+        Commands to execute in each of the work directories/paths specified. If `commands` is of length 1, that
         command will be executed in each of the work directories.
-    paths : tuple
+    paths : list
         Directories in which to execute program
     nprocesses: int, optional
         Choose the number of concurrent processes. Default the number of CPUs, see ´os.cpu_count()´
     shell : bool, optional
-        Spin up a system dependent shell process (commonly \bin\sh on Linux or cmd.exe on Windows) and run the command
+        Spin up a system dependent shell process (commonly /bin/sh on Linux or cmd.exe on Windows) and run the command
         within it. Not needed if calling an executable file.
     env : dict, optional
         Environmental variables passed to program
@@ -169,13 +171,14 @@ def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None,
 
     """
     if isinstance(commands, (list, tuple)):
-        if len(commands) != len(paths):
-            logger.error(f"The number of commands must equal the number of work directories. You specified "
-                         f"{len(commands)} commands and {len(paths)} work directories.")
-    elif isinstance(commands, str):
-        commands = [commands for _ in paths]    # duplicate command for all work directories
+        if len(commands) == 1:
+            commands *= len(paths)      # duplicate command for all work directories
+
+        elif len(commands) != len(paths):
+            logger.error(f"The number of commands must 1 or equal the number of paths. You specified "
+                         f"{len(commands)} commands and {len(paths)} paths.")
     else:
-        logger.error(f"The `commands` parameter must be a string or a list, not {type(commands)}.")
+        logger.error(f"The `commands` parameter must be a tuple or a list, not {type(commands)}.")
 
     # initiate worker pool
     pool = mp.Pool(processes=nprocesses)
@@ -265,11 +268,11 @@ def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None):
             t0 = datetime.datetime.now()
 
     # prevent any more tasks from being submitted to the pool
-    #pool.close()
+    # pool.close()
     logger.debug("Closed worker pool to prevent more tasks from being submitted.")
 
     # provides a synchronization point that can report some exceptions occurring in worker processes
-    #pool.join()
+    # pool.join()
     logger.debug("Join worker processes.")
 
     # retrieve response from processes
@@ -351,11 +354,13 @@ def cli():
     # create console argument parser
     parser = argparse.ArgumentParser(prog="dtm-run", description="Distributed task manager. Parallel execution of a"
                                                                  " command in many work directories.",)
-    parser.add_argument("command", type=str,
-                        help="Command to be executed in each work directory. Can be a shell command like 'dir' or path "
-                             "to an executable '/home/bin/run_something.cmd'.")
-    parser.add_argument("path_file", type=str, help="Textfile with work directory paths, only one per line.")
-    parser.add_argument("-p", "--processes", type=int,
+    parser.add_argument("commands", type=str, nargs="+",
+                        help="Command to be executed per path (work directory). Can be a shell commands like 'dir' or "
+                             "path to an executable '/home/bin/run_something.cmd'. If a single command is provided "
+                             "this will be repeated for each path.")
+    parser.add_argument("-p", "--paths", type=str, required=True,
+                        help="Textfile with work directory paths, only one per line.")
+    parser.add_argument("-n", "--num-processes", type=int,
                         help="The number of worker processes to use. By default the OS CPU count is used.")
     parser.add_argument("-s", "--shell", action="store_true",
                         help="Spin up a system dependent shell process (commonly bash on Linux or cmd on Windows) and "
@@ -387,14 +392,11 @@ def cli():
     logger.addHandler(fh)
 
     # work directory paths
-    paths = parse_path_file(args.path_file)
-
-    # transform command string into a tuple of command arguments
-    command = tuple(args.command.split())
+    paths = parse_path_file(args.paths)
 
     # distribute tasks and collect response
-    response = subprocess_commands(command, paths, nprocesses=args.processes, shell=args.shell, pipe=args.pipe_stdout,
-                                   timeout=args.timeout)
+    response = subprocess_commands(args.commands, paths, nprocesses=args.num_processes, shell=args.shell,
+                                   pipe=args.pipe_stdout, timeout=args.timeout)
 
     # log the process response
     log_response(response)
