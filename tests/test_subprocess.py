@@ -18,10 +18,6 @@ def test_linux(subproc_command):
         pass
     else:
         r = subproc_command('ls -a', pipe=True)
-        assert r.get('returncode') != 0
-        assert r.get('status') == 'error'
-
-        r = subproc_command('ls -a', pipe=True, shell=True)
         assert r.get('returncode') == 0
         assert r.get('status') == 'completed'
 
