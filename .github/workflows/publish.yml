@@ -22,10 +22,10 @@ jobs:
         cache: 'poetry'
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --with dev
 
     - name: Run tests
-      run: poetry nox -s tests
+      run: poetry run nox -s tests
     - name: Publish package
       run: |
         poetry config repositories.packagr ${{ secrets.PACKAGR_REPOSITORY_URL }}

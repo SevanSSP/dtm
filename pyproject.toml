@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dtm"
-version = "0.2.2"
+version = "0.3.0"
 description = ""
 authors = ["tovop <pev@sevassp.com>",
            "EBGlom <ebg@sevassp.com>"]
@@ -8,7 +8,7 @@ authors = ["tovop <pev@sevassp.com>",
 [tool.poetry.dependencies]
 python = ">=3.8.1, < 3.13"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
 nox = "^2024.4.15"
 flake8 = "^7.1.1"
