@@ -112,14 +112,14 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
                         returncode=1, status='error', output='',
                         msg=f'Command "{command[0]}" could not be found.')
         logger.debug("\t" + response.get('msg'))
-        logger.debug("\t" + e)
+        logger.debug("\t" + str(e))
 
     except NotADirectoryError as e:
         response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
                         returncode=1, status='error', output='',
                         msg=f'The path "{path}" is invalid. The directory does not exist.')
         logger.debug("\t" + response.get('msg'))
-        logger.debug("\t" + e)
+        logger.debug("\t" + str(e))
 
     else:
         if p.returncode == 0:
