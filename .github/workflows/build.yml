@@ -25,7 +25,7 @@ jobs:
           cache: 'poetry'
 
       - name: Install Dependencies
-        run: poetry install
+        run: poetry install --with dev
 
       - name: Run tests with Nox
         run: poetry run nox -s lint tests
