@@ -1,5 +1,6 @@
 # DTM
-[![Build Status](https://travis-ci.com/SevanSSP/dtm.svg?token=3uQ4z5yHC2AVPsxguFuR&branch=master)](https://travis-ci.com/SevanSSP/dtm)
+[![Build and test package](https://github.com/SevanSSP/dtm/actions/workflows/build.yml/badge.svg)](https://github.com/SevanSSP/dtm/actions/workflows/build.yml)
+[![Publish Python package to Packagr](https://github.com/SevanSSP/dtm/actions/workflows/publish.yml/badge.svg)](https://github.com/SevanSSP/dtm/actions/workflows/publish.yml)
 ## Description
 Python package for managing tasks executed in parallel processes.
 
@@ -9,7 +10,7 @@ A task is defined by a **command** and a **work directory**. The work directory 
 Install the package from Packagr using pip
 
 ```bash
- pip install dtm --extra-index-url https://api.packagr.app/EYvhW6SyL/ --disable-pip-version-check
+ pip install dtm --extra-index-url https://api.packagr.app/EYvhW6SyL/
 ```
 
 ## Usage
