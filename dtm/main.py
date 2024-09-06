@@ -7,7 +7,7 @@ import os
 import json
 import logging
 import datetime
-from typing import TypedDict, Literal, Optional, List
+from typing import TypedDict, Literal, Optional, List, Callable, Any, Dict
 
 # grab logger from multiprocessing package
 logger = mp.get_logger()
@@ -32,7 +32,7 @@ class ResponseDict(TypedDict):
     msg: str
 
 
-def subprocess_command(command: str, path=None, shell=False, env=None, pipe=False, timeout=None) -> ResponseDict:
+def subprocess_command(command: str, path: Optional[str]=None, shell: bool=False, env: Optional[Dict[str, str]]=None, pipe: bool=False, timeout: Optional[int]=None) -> ResponseDict:
     """
     Execute command in subprocess.
 
@@ -59,7 +59,7 @@ def subprocess_command(command: str, path=None, shell=False, env=None, pipe=Fals
 
     Returns
     -------
-    dict
+    ResponseDict
         Process response
             returncode - 0 means success, non-zero code means failure
             ppid - parent process id
@@ -150,7 +150,7 @@ def subprocess_command(command: str, path=None, shell=False, env=None, pipe=Fals
     return response
 
 
-def subprocess_commands(commands: List[str], paths: List[str], nprocesses=None, shell=False, env=None, pipe=False, timeout=None) -> List[ResponseDict]:
+def subprocess_commands(commands: List[str], paths: List[str], nprocesses: Optional[int]=None, shell: bool=False, env: Optional[Dict[str, str]]=None, pipe: bool=False, timeout: Optional[int]=None) -> List[ResponseDict]:
     r"""
     Execute commands over many work directories in several parallel subprocess.
 
@@ -224,7 +224,7 @@ def subprocess_commands(commands: List[str], paths: List[str], nprocesses=None, 
     return response
 
 
-def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None) -> List[ResponseDict]:
+def multiprocess_functions(functions: List[Callable], args: Optional[List[List[Any]]]=None, kwargs: Optional[List[Dict[str, Any]]]=None, nprocesses: Optional[int]=None) -> List[ResponseDict]:
     """
     Multiprocess functions.
 
