@@ -6,8 +6,8 @@ import subprocess
 import os
 import json
 import logging
-import argparse
 import datetime
+from typing import TypedDict, Literal, Optional
 
 # grab logger from multiprocessing package
 logger = mp.get_logger()
@@ -22,7 +22,17 @@ LOGGING_LEVELS = dict(
 )
 
 
-def subprocess_command(command, path=None, shell=False, env=None, pipe=False, timeout=None):
+class ResponseDict(TypedDict):
+    returncode: int
+    ppid: int
+    pid: int
+    path: str
+    output: Optional[str]
+    status: Literal["completed", "error", "timeout"]
+    msg: str
+
+
+def subprocess_command(command: str, path=None, shell=False, env=None, pipe=False, timeout=None) -> ResponseDict:
     """
     Execute command in subprocess.
 
@@ -56,7 +66,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
             pid - process id
             path - work directory
             output - dump from standard out (empty if dumped to file)
-            status - 'completed', 'failed' or 'timed out'
+            status - 'completed', 'error' or 'timeout'
             msg - Description
 
     """
@@ -95,7 +105,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
                            timeout=timeout)
 
     except subprocess.TimeoutExpired as e:
-        response = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
+        response: ResponseDict = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
                         returncode=1, status='timeout', output=e.stdout.decode() if e.stdout is not None else None,
                         msg=f'Command "{e.cmd}" timed out after {e.timeout} seconds.')
         logger.debug("\t" + response.get('msg'))
@@ -140,7 +150,7 @@ def subprocess_command(command, path=None, shell=False, env=None, pipe=False, ti
     return response
 
 
-def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None, pipe=False, timeout=None):
+def subprocess_commands(commands: list[str], paths: list[str], nprocesses=None, shell=False, env=None, pipe=False, timeout=None) -> list[ResponseDict]:
     r"""
     Execute commands over many work directories in several parallel subprocess.
 
@@ -207,14 +217,14 @@ def subprocess_commands(commands, paths, nprocesses=None, shell=False, env=None,
     logger.debug("Join worker processes.")
 
     # retrieve response from processes
-    response = [p.get() for p in subprocesses]
+    response: list[ResponseDict] = [p.get() for p in subprocesses]
     logger.debug("Retrieved response from the processes:")
     logger.debug(json.dumps(response, indent=2))
 
     return response
 
 
-def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None):
+def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None) -> list[ResponseDict]:
     """
     Multiprocess functions.
 
@@ -283,7 +293,7 @@ def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None):
     return response
 
 
-def parse_path_file(filename):
+def parse_path_file(filename: str) -> list[str]:
     """
     Read list of work directory paths from file
 
