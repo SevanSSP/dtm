@@ -1,5 +1,5 @@
 import pytest
-from dtm.main import multiprocess_functions, subprocess_command
+from dtm.main import multiprocess_functions, subprocess_command, ResponseDict
 
 
 @pytest.fixture(scope='function')
@@ -33,3 +33,11 @@ def subproc_command():
     def _method(*args, **kwargs):
         return subprocess_command(*args, **kwargs)
     return _method
+
+@pytest.fixture(scope='function')
+def ok_response() -> ResponseDict:
+    return ResponseDict(returncode=0, ppid=123, pid=1, path="dummy/ok_path", output=None, status="completed", msg="example response")
+
+@pytest.fixture(scope='function')
+def bad_response() -> ResponseDict:
+    return ResponseDict(returncode=1, ppid=321, pid=1, path="dummy/bad_path", output=None, status="error", msg="example error response")

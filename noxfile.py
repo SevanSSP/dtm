@@ -46,8 +46,7 @@ def tests(session):
 def cover(session):
     """Analyse and report test coverage."""
     session.install("coverage")
-    # TODO: Add "--fail-under=99" once test coverage is improved
-    session.run("coverage", "report", "--show-missing")
+    session.run("coverage", "report", "--show-missing", "--omit=tests/*",  "--fail-under=91") # TODO: Increase test coverage to 95 %
     session.run("coverage", "erase")
 
 
