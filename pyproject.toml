@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dtm"
-version = "0.3.0"
+version = "1.0.0"
 description = ""
 authors = ["tovop <pev@sevassp.com>",
            "EBGlom <ebg@sevassp.com>"]
