@@ -7,7 +7,7 @@ import os
 import json
 import logging
 import datetime
-from typing import TypedDict, Literal, Optional
+from typing import TypedDict, Literal, Optional, List
 
 # grab logger from multiprocessing package
 logger = mp.get_logger()
@@ -150,7 +150,7 @@ def subprocess_command(command: str, path=None, shell=False, env=None, pipe=Fals
     return response
 
 
-def subprocess_commands(commands: list[str], paths: list[str], nprocesses=None, shell=False, env=None, pipe=False, timeout=None) -> list[ResponseDict]:
+def subprocess_commands(commands: List[str], paths: List[str], nprocesses=None, shell=False, env=None, pipe=False, timeout=None) -> List[ResponseDict]:
     r"""
     Execute commands over many work directories in several parallel subprocess.
 
@@ -217,14 +217,14 @@ def subprocess_commands(commands: list[str], paths: list[str], nprocesses=None, 
     logger.debug("Join worker processes.")
 
     # retrieve response from processes
-    response: list[ResponseDict] = [p.get() for p in subprocesses]
+    response: List[ResponseDict] = [p.get() for p in subprocesses]
     logger.debug("Retrieved response from the processes:")
     logger.debug(json.dumps(response, indent=2))
 
     return response
 
 
-def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None) -> list[ResponseDict]:
+def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None) -> List[ResponseDict]:
     """
     Multiprocess functions.
 
@@ -293,7 +293,7 @@ def multiprocess_functions(functions, args=None, kwargs=None, nprocesses=None) -
     return response
 
 
-def parse_path_file(filename: str) -> list[str]:
+def parse_path_file(filename: str) -> List[str]:
     """
     Read list of work directory paths from file
 
@@ -318,7 +318,7 @@ def parse_path_file(filename: str) -> list[str]:
         return paths
 
 
-def log_response(response: list[ResponseDict], status_summary_path: str = "status.txt", failed_tasks_path: str = "failed_paths.txt") -> None:
+def log_response(response: List[ResponseDict], status_summary_path: str = "status.txt", failed_tasks_path: str = "failed_paths.txt") -> None:
     """
 
     Parameters
