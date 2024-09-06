@@ -33,6 +33,7 @@ def tests(session):
     # install dependencies
     session.run("poetry", "install", external=True)
     session.install("pytest")
+    session.install("pytest-mock")
     session.install("coverage")
     # session.install("-r", "requirements.txt")
 
