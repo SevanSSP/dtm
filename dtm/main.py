@@ -308,13 +308,17 @@ def parse_path_file(filename):
         return paths
 
 
-def log_response(response):
+def log_response(response: list[ResponseDict], status_summary_path: str = "status.txt", failed_tasks_path: str = "failed_paths.txt") -> None:
     """
 
     Parameters
     ----------
     response : list
         Dictionaries of process response
+    status_summary_path: str
+        Path to write status summary to
+    failed_tasks_path: str
+        Path to write list of failed tasks to
 
     Notes
     -----
@@ -336,13 +340,13 @@ def log_response(response):
             failed_tasks.append(r.get('path') + "\n")
 
     # write status summary
-    with open('status.txt', 'w') as f:
+    with open(status_summary_path, 'w') as f:
         f.writelines(all_tasks)
     logger.info("Task status written to 'status.txt.")
 
     # list paths to failed runs
     if len(failed_tasks) > 0:
-        with open('failed_paths.txt', 'w') as f:
+        with open(failed_tasks_path, 'w') as f:
             f.writelines(failed_tasks)
         logger.info("Paths to failed tasks written to 'failed_paths.txt.")
 
