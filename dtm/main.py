@@ -9,12 +9,12 @@ import logging
 import datetime
 from typing import TypedDict, Literal, Optional, List, Callable, Any, Dict
 
-# grab logger from multiprocessing package
-logger = mp.get_logger()
+# grab logger from multiprocessing package  
+logger: logging.Logger = mp.get_logger()
 
 
 # setup logging levels
-LOGGING_LEVELS = dict(
+LOGGING_LEVELS: Dict[str, int] = dict(
     debug=logging.DEBUG,
     info=logging.INFO,
     warning=logging.WARNING,
