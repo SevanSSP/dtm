@@ -32,7 +32,7 @@ class ResponseDict(TypedDict):
     msg: str
 
 
-def subprocess_command(command: str, path: Optional[str]=None, shell: bool=False, env: Optional[Dict[str, str]]=None, pipe: bool=False, timeout: Optional[int]=None) -> ResponseDict:
+def subprocess_command(command: str, path: Optional[str] = None, shell: bool = False, env: Optional[Dict[str, str]] = None, pipe: bool = False, timeout: Optional[int] = None) -> ResponseDict:
     """
     Execute command in subprocess.
 
@@ -106,8 +106,8 @@ def subprocess_command(command: str, path: Optional[str]=None, shell: bool=False
 
     except subprocess.TimeoutExpired as e:
         response: ResponseDict = dict(pid=os.getpid(), ppid=os.getppid(), path=path,
-                        returncode=1, status='timeout', output=e.stdout.decode() if e.stdout is not None else None,
-                        msg=f'Command "{e.cmd}" timed out after {e.timeout} seconds.')
+                                      returncode=1, status='timeout', output=e.stdout.decode() if e.stdout is not None else None,
+                                      msg=f'Command "{e.cmd}" timed out after {e.timeout} seconds.')
         logger.debug("\t" + response.get('msg'))
 
     except subprocess.CalledProcessError as e:
@@ -150,7 +150,7 @@ def subprocess_command(command: str, path: Optional[str]=None, shell: bool=False
     return response
 
 
-def subprocess_commands(commands: List[str], paths: List[str], nprocesses: Optional[int]=None, shell: bool=False, env: Optional[Dict[str, str]]=None, pipe: bool=False, timeout: Optional[int]=None) -> List[ResponseDict]:
+def subprocess_commands(commands: List[str], paths: List[str], nprocesses: Optional[int] = None, shell: bool = False, env: Optional[Dict[str, str]] = None, pipe: bool = False, timeout: Optional[int] = None) -> List[ResponseDict]:
     r"""
     Execute commands over many work directories in several parallel subprocess.
 
@@ -224,7 +224,7 @@ def subprocess_commands(commands: List[str], paths: List[str], nprocesses: Optio
     return response
 
 
-def multiprocess_functions(functions: List[Callable], args: Optional[List[List[Any]]]=None, kwargs: Optional[List[Dict[str, Any]]]=None, nprocesses: Optional[int]=None) -> List[ResponseDict]:
+def multiprocess_functions(functions: List[Callable], args: Optional[List[List[Any]]] = None, kwargs: Optional[List[Dict[str, Any]]] = None, nprocesses: Optional[int] = None) -> List[ResponseDict]:
     """
     Multiprocess functions.
 
